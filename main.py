@@ -9,7 +9,7 @@ main_image_file = PIL.Image.new('RGB', (0, 0))
 second_image_file = PIL.Image.new('RGB', (0, 0))
 
 # Size of the window for our program
-WINDOW_SIZE = '300x200'
+WINDOW_SIZE = '300x100'
 
 
 def print_bits():
@@ -24,6 +24,45 @@ def print_bits():
         for y in range(height):
             rgb_tuple = main_image_file.getpixel((x, y))
             print(rgb_tuple)
+
+
+def hide_text(text_to_hide):
+    global main_image_file
+    print("Before clear")
+    print_bits()
+
+    # For testing purpose, use numbers for now
+    num = str(text_to_hide)
+    normalized_num_code = ord(num) - 48
+    print(normalized_num_code)
+
+    clear_bits()
+    print("After clear")
+    print_bits()
+
+    # Finally hide our number in the pixels
+    rgb_tuple = main_image_file.getpixel((0, 0))
+    rval = rgb_tuple[0]
+    gval = rgb_tuple[1]
+    bval = rgb_tuple[2]
+
+    # Next come up with a way to break our number
+    # Generate three masks
+    rmask = rval | 4
+    gmask = gval | 2
+    bmask = bval | 1
+
+    encoded_rgb_tuple = (rmask, gmask, bmask)
+
+    main_image_file.putpixel((0, 0), encoded_rgb_tuple)
+
+    print("After encode")
+    print_bits()
+
+
+
+
+
 
 
 def set_image_file(image, image_file):
@@ -117,17 +156,12 @@ def generate_ui():
                                 width=22)
     select_button_main.pack()
 
-    # Button that calls the conversion function
-    convert_button = Button(frame2, text="Print bits", command=lambda: print_bits(), width=22)
-    convert_button.pack()
-
-    # Button to clear out the least significant bits of an image
-    image_button = Button(frame3, text="Clear low bits", command=lambda: clear_bits(), width=22)
+    # Button to hide our text
+    image_button = Button(frame2, text="Hide text", command=lambda: hide_text(3), width=22)
     image_button.pack()
 
     frame1.pack(padx=10, pady=10)
     frame2.pack(padx=1, pady=1)
-    frame3.pack(padx=10, pady=10)
     root.mainloop()
 
     # Button to select the image that we want to hide

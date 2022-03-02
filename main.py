@@ -9,21 +9,21 @@ main_image_file = PIL.Image.new('RGB', (0, 0))
 second_image_file = PIL.Image.new('RGB', (0, 0))
 
 # Size of the window for our program
-WINDOW_SIZE = '300x150'
+WINDOW_SIZE = '300x200'
 
 
-def steganographize(root):
-    """Function to generate the new steganographized image"""
-    image_file = get_image_file()
-    width, height = grab_dimensions(image_file)
-    R_array, G_array, B_array = initialize_color_arrays()
-    create_buckets(image_file, width, height, R_array, G_array, B_array)
+def print_bits():
+    """Function to check our RGB values of the image pixels"""
+    global main_image_file
+    dimensions = grab_dimensions(main_image_file)
+    width = dimensions[0]
+    height = dimensions[1]
 
-    plot_graph(R_array, 'red')
-    plot_graph(G_array, 'green')
-    plot_graph(B_array, 'blue')
-
-    display_plots()
+    # Print the RGB values of each pixel location
+    for x in range(width):
+        for y in range(height):
+            rgb_tuple = main_image_file.getpixel((x, y))
+            print(rgb_tuple)
 
 
 def set_image_file(image, image_file):
@@ -53,52 +53,41 @@ def open_image(root, image_file):
     root.deiconify()
 
 
-def plot_graph(color_array, color):
-    """This function generates our histogram"""
-    x_array = list(range(256))
-    plt.plot(x_array, color_array, color)
-
-
-def display_plots():
-    """This function displays our histogram"""
-    plt.show()
-
-
 def grab_dimensions(image):
     """This function grabs the dimensions of the image"""
     width, height = image.size
     return width, height
 
 
-def initialize_color_arrays():
-    """This function generates and returns the 3 color arrays"""
-    R_array = [0] * 256
-    G_array = [0] * 256
-    B_array = [0] * 256
-    return R_array, G_array, B_array
+def new_rgb_tuple_gen(rgb_tuple):
+    """This function ingests our RGB tuple and regenerates a new one with low order bits removed"""
+    rval = rgb_tuple[0]
+    gval = rgb_tuple[1]
+    bval = rgb_tuple[2]
+
+    new_rval = rval & 254
+    new_gval = gval & 254
+    new_bval = bval & 254
+
+    new_rgb_tuple = (new_rval, new_gval, new_bval)
+    return new_rgb_tuple
 
 
-def create_buckets(image, width, height, R_array, G_array, B_array):
-    """"This function parses the image and fills the color arrays"""
-    test_pixel = image.getpixel((0, 0))  # Check to see if the returned tuple also has an alpha value
+def clear_bits():
+    """Function to clear the low order bits of our image"""
+    global main_image_file
+    dimensions = grab_dimensions(main_image_file)
+    width = dimensions[0]
+    height = dimensions[1]
 
-    if len(test_pixel) == 3:
-        for i in range(height):
-            for j in range(width):
-                red_val, green_val, blue_val = image.getpixel((j, i))
-                R_array[red_val] += 1
-                G_array[green_val] += 1
-                B_array[blue_val] += 1
+    # Print the RGB values of each pixel location
+    for x in range(width):
+        for y in range(height):
+            rgb_tuple = main_image_file.getpixel((x, y))
+            new_rgb_tuple = new_rgb_tuple_gen(rgb_tuple)
+            main_image_file.putpixel((x, y), new_rgb_tuple)
 
-    else:
-        for i in range(height):
-            for j in range(width):
-                red_val, green_val, blue_val, alpha_val = image.getpixel((j, i))
-                R_array[red_val] += 1
-                G_array[green_val] += 1
-                B_array[blue_val] += 1
-
-    return R_array, G_array, B_array
+    main_image_file.save('edited_sample.png')
 
 
 def generate_ui():
@@ -106,12 +95,18 @@ def generate_ui():
     global main_image_file
     global second_image_file
 
+    # Variables, text, etc. for temporary use
+    secret_text = 'abc'
+
     root = Tk()
 
     root.geometry(WINDOW_SIZE)
 
     # The frame variables for our 3 buttons
     frame1, frame2, frame3 = Frame(root), Frame(root), Frame(root)
+
+    # This button will be temporary, just for generating our sample image
+    frame4 = Frame(root)
 
     root.title("Image Steganographer")
 
@@ -122,21 +117,33 @@ def generate_ui():
                                 width=22)
     select_button_main.pack()
 
-    # Button to select the image that we want to hide
-    button_default_text = StringVar()
-    button_default_text.set("Select image to hide")
-    select_button_secondary = Button(frame2, textvariable=button_default_text,
-                                     command=lambda: open_image(root, "secondary"), width=22)
-    select_button_secondary.pack()
-
     # Button that calls the conversion function
-    convert_button = Button(frame3, text="Steganographize", command=lambda: steganographize(root), width=22)
+    convert_button = Button(frame2, text="Print bits", command=lambda: print_bits(), width=22)
     convert_button.pack()
+
+    # Button to clear out the least significant bits of an image
+    image_button = Button(frame3, text="Clear low bits", command=lambda: clear_bits(), width=22)
+    image_button.pack()
 
     frame1.pack(padx=10, pady=10)
     frame2.pack(padx=1, pady=1)
     frame3.pack(padx=10, pady=10)
     root.mainloop()
+
+    # Button to select the image that we want to hide
+    # button_default_text = StringVar()
+    # button_default_text.set("Select image to hide")
+    # select_button_secondary = Button(frame2, textvariable=button_default_text,
+    #                                 command=lambda: open_image(root, "secondary"), width=22)
+    # select_button_secondary.pack()
+
+    # Button to generate our sample images of necessary sizes
+    # image_button = Button(frame4, text="Generate Sample", command=lambda: sample_generate(secret_text), width=22)
+    # image_button.pack()
+
+    # Temporary button to hide text inside an image
+    # hide_button = Button(frame4, text="Hide Text", command=lambda: sample_generate(secret_text), width=22)
+    # hide_button.pack()
 
 
 def main():

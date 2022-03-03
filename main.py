@@ -30,53 +30,36 @@ def print_bits():
             rgb_tuple = main_image_file.getpixel((x, y))
             print(rgb_tuple)
 
+
 def trigger():
-    print(0, end=" :")
-    hide_text(0)
-    print(1, end=" :")
-    hide_text(1)
-    print(2, end=" :")
-    hide_text(2)
-    print(3, end=" :")
-    hide_text(3)
-    print(4, end=" :")
-    hide_text(4)
-    print(5, end=" :")
-    hide_text(5)
-    print(6, end=" :")
-    hide_text(6)
-    print(7, end=" :")
-    hide_text(7)
+    return 0
+
+
+def gen_text_code_list(text):
+    """This function generates a character list of our string"""
+    text_list = []
+    lower_text = text.lower()
+
+    # Function to iterate over the characters in the string and add to list
+    for c in lower_text:
+        text_list.append(c)
+
+    print(text_list)
+
 
 def hide_text(text_to_hide):
     global main_image_file
-    # For testing purpose, use numbers for now
-    num = str(text_to_hide)
-    normalized_num_code = ord(num) - 48
-    #print(normalized_num_code)
+
+    txt = gen_text_code_list(text_to_hide)
 
     # Call function to clear out low order bits
     clear_bits()
 
-    # Finally hide our number in the pixels
+    # Finally hide our text in the pixels
     rgb_tuple = main_image_file.getpixel((0, 0))
     rval = rgb_tuple[0]
     gval = rgb_tuple[1]
     bval = rgb_tuple[2]
-
-    # Next come up with a way to break our number
-    # Generate three masks
-    rmask = normalized_num_code >> 2
-    gmask = (normalized_num_code & 2) >> 1
-    bmask = normalized_num_code & 1
-    print(rmask, end=" ")
-    print(gmask, end=" ")
-    print(bmask)
-
-    #encoded_rgb_tuple = (rmask, gmask, bmask)
-
-    #main_image_file.putpixel((0, 0), encoded_rgb_tuple)
-    #print_bits()
 
 
 def set_image_file(image, image_file):
@@ -107,6 +90,10 @@ def grab_dimensions(image):
     """This function grabs the dimensions of the image"""
     width, height = image.size
     return width, height
+
+
+def listify():
+    """This function takes our image and constructs a list with discrete R, G and B values as items"""
 
 
 def new_rgb_tuple_gen(rgb_tuple):
@@ -166,7 +153,7 @@ def generate_ui():
     select_button_main.pack()
 
     # Button to hide our text
-    image_button = Button(frame2, text="Hide text", command=lambda: trigger(), width=22)
+    image_button = Button(frame2, text="Hide text", command=lambda: hide_text("hello"), width=22)
     image_button.pack()
 
     frame1.pack(padx=10, pady=10)

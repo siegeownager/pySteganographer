@@ -6,10 +6,15 @@ import sys
 
 # Our 2 image file objects
 main_image_file = PIL.Image.new('RGB', (0, 0))
-second_image_file = PIL.Image.new('RGB', (0, 0))
 
 # Size of the window for our program
 WINDOW_SIZE = '300x100'
+
+
+def max_info_size():
+    """This function will tell us what the maximum size of the information that can be stored is"""
+    global main_image_file
+    dimensions = grab_dimensions(main_image_file)
 
 
 def print_bits():
@@ -25,20 +30,33 @@ def print_bits():
             rgb_tuple = main_image_file.getpixel((x, y))
             print(rgb_tuple)
 
+def trigger():
+    print(0, end=" :")
+    hide_text(0)
+    print(1, end=" :")
+    hide_text(1)
+    print(2, end=" :")
+    hide_text(2)
+    print(3, end=" :")
+    hide_text(3)
+    print(4, end=" :")
+    hide_text(4)
+    print(5, end=" :")
+    hide_text(5)
+    print(6, end=" :")
+    hide_text(6)
+    print(7, end=" :")
+    hide_text(7)
 
 def hide_text(text_to_hide):
     global main_image_file
-    print("Before clear")
-    print_bits()
-
     # For testing purpose, use numbers for now
     num = str(text_to_hide)
     normalized_num_code = ord(num) - 48
-    print(normalized_num_code)
+    #print(normalized_num_code)
 
+    # Call function to clear out low order bits
     clear_bits()
-    print("After clear")
-    print_bits()
 
     # Finally hide our number in the pixels
     rgb_tuple = main_image_file.getpixel((0, 0))
@@ -48,33 +66,26 @@ def hide_text(text_to_hide):
 
     # Next come up with a way to break our number
     # Generate three masks
-    rmask = rval | 4
-    gmask = gval | 2
-    bmask = bval | 1
+    rmask = normalized_num_code >> 2
+    gmask = (normalized_num_code & 2) >> 1
+    bmask = normalized_num_code & 1
+    print(rmask, end=" ")
+    print(gmask, end=" ")
+    print(bmask)
 
-    encoded_rgb_tuple = (rmask, gmask, bmask)
+    #encoded_rgb_tuple = (rmask, gmask, bmask)
 
-    main_image_file.putpixel((0, 0), encoded_rgb_tuple)
-
-    print("After encode")
-    print_bits()
-
-
-
-
-
+    #main_image_file.putpixel((0, 0), encoded_rgb_tuple)
+    #print_bits()
 
 
 def set_image_file(image, image_file):
     """This function sets the image object to the right value"""
     global main_image_file
-    global second_image_file
 
     # Set the right image file object based on which button was pressed
     if image_file == "main":
-        main_image_file = PIL.Image.open(image)
-    elif image_file == "secondary":
-        second_image_file = PIL.Image.open(image)
+        main_image_file = PIL.Image.open(image).convert('RGB')
     else:
         print("Something unexpected happened!")
         sys.exit()
@@ -126,8 +137,6 @@ def clear_bits():
             new_rgb_tuple = new_rgb_tuple_gen(rgb_tuple)
             main_image_file.putpixel((x, y), new_rgb_tuple)
 
-    main_image_file.save('edited_sample.png')
-
 
 def generate_ui():
     """Function to generate our GUI using tkinter"""
@@ -157,7 +166,7 @@ def generate_ui():
     select_button_main.pack()
 
     # Button to hide our text
-    image_button = Button(frame2, text="Hide text", command=lambda: hide_text(3), width=22)
+    image_button = Button(frame2, text="Hide text", command=lambda: trigger(), width=22)
     image_button.pack()
 
     frame1.pack(padx=10, pady=10)

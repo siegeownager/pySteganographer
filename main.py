@@ -31,29 +31,52 @@ def print_bits():
             print(rgb_tuple)
 
 
-def trigger():
-    return 0
+def gen_rgb_list():
+    """This function takes our image and constructs a list with discrete R, G and B values as items"""
+    global main_image_file
+    rgb_list = []
+    dimension = grab_dimensions(main_image_file)
+
+    width = dimension[0]
+    height = dimension[1]
+
+    for x in width:
+        for y in height:
+            rgb_tuple = main_image_file.getpixel((x, y))
+            rval = rgb_tuple[0]
+            gval = rgb_tuple[1]
+            bval = rgb_tuple[2]
+
+
+
+
 
 
 def gen_text_code_list(text):
-    """This function generates a character list of our string"""
+    """This function generates and returns an ascii list of our string"""
     text_list = []
     lower_text = text.lower()
 
     # Function to iterate over the characters in the string and add to list
     for c in lower_text:
+        if (c == ' '):
+            new_c = 0
+        else:
+            new_c = ord(c) - 96  # Subtract 96 so our alphabets start from index 1
         text_list.append(c)
 
-    print(text_list)
+    return text_list
 
 
 def hide_text(text_to_hide):
     global main_image_file
 
-    txt = gen_text_code_list(text_to_hide)
+    text_list = gen_text_code_list(text_to_hide)
 
     # Call function to clear out low order bits
     clear_bits()
+
+    # Call function to listify our pixel space
 
     # Finally hide our text in the pixels
     rgb_tuple = main_image_file.getpixel((0, 0))
@@ -90,10 +113,6 @@ def grab_dimensions(image):
     """This function grabs the dimensions of the image"""
     width, height = image.size
     return width, height
-
-
-def listify():
-    """This function takes our image and constructs a list with discrete R, G and B values as items"""
 
 
 def new_rgb_tuple_gen(rgb_tuple):
@@ -153,7 +172,7 @@ def generate_ui():
     select_button_main.pack()
 
     # Button to hide our text
-    image_button = Button(frame2, text="Hide text", command=lambda: hide_text("hello"), width=22)
+    image_button = Button(frame2, text="Hide text", command=lambda: hide_text("hello world"), width=22)
     image_button.pack()
 
     frame1.pack(padx=10, pady=10)

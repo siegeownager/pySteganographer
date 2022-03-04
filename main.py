@@ -1,4 +1,4 @@
-import PIL
+import PIL.Image
 from tkinter import *
 from tkinter.filedialog import askopenfilename
 import sys
@@ -63,7 +63,7 @@ def gen_text_code_list(text):
     # Function to iterate over the characters in the string and add to list
     for c in lower_text:
         if c == ' ':
-            new_c = 0
+            new_c = 27  # Set whitespace as numeric code 27
         else:
             new_c = ord(c) - 96  # Subtract 96 so our alphabets start from index 1
         text_list.append(new_c)
@@ -85,12 +85,28 @@ def hide_text(text_to_hide):
 
     clear_bits()  # Clear low order bits of image
 
-    text_list = gen_text_code_list(text_to_hide)    # Obtain character list of string
-    rgb_list = gen_rgb_list()                       # Listify our RGB space
+    text_list = gen_text_code_list(text_to_hide)  # Obtain character list of string
+    rgb_list = gen_rgb_list()  # Listify our RGB space
 
-    # Finally hide our text in the pixels
-    rgb_tuple = main_image_file.getpixel((0, 0))    # Get RGB tuple of pixel
-    rval, gval, bval = tuple_to_val(rgb_tuple)      # Split tuple into 3 variables
+    # Finally, hide our text in the pixels
+    rgb_tuple = main_image_file.getpixel((0, 0))  # Get RGB tuple of pixel
+    rval, gval, bval = tuple_to_val(rgb_tuple)  # Split tuple into 3 variables
+
+    rgx_index = 0  # Our index for the RGB list begins from 0
+
+    for str_index in range(len(text_list)):
+        char_to_encode = text_list[str_index]
+        bit_one = (char_to_encode & 16) >> 4
+        bit_two = (char_to_encode & 8) >> 3
+        bit_three = (char_to_encode & 4) >> 2
+        bit_four = (char_to_encode & 2) >> 1
+        bit_five = (char_to_encode & 1) >> 0
+
+        print(bit_one, end=" ")
+        print(bit_two, end=" ")
+        print(bit_three, end=" ")
+        print(bit_four, end=" ")
+        print(bit_five)
 
 
 def set_image_file(image, image_file):
@@ -179,7 +195,7 @@ def generate_ui():
     select_button_main.pack()
 
     # Button to hide our text
-    image_button = Button(frame2, text="Hide text", command=lambda: hide_text("hello world"), width=22)
+    image_button = Button(frame2, text="Hide text", command=lambda: hide_text("Hello world"), width=22)
     image_button.pack()
 
     frame1.pack(padx=10, pady=10)

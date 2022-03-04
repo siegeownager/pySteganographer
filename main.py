@@ -1,5 +1,4 @@
 import PIL
-import matplotlib.pyplot as plt
 from tkinter import *
 from tkinter.filedialog import askopenfilename
 import sys
@@ -31,6 +30,13 @@ def print_bits():
             print(rgb_tuple)
 
 
+def append_multiple(nlist, x, y, z):
+    """Append x, y and z to list"""
+    nlist.append(x)
+    nlist.append(y)
+    nlist.append(z)
+
+
 def gen_rgb_list():
     """This function takes our image and constructs a list with discrete R, G and B values as items"""
     global main_image_file
@@ -40,16 +46,13 @@ def gen_rgb_list():
     width = dimension[0]
     height = dimension[1]
 
-    for x in width:
-        for y in height:
+    for x in range(width):
+        for y in range(height):
             rgb_tuple = main_image_file.getpixel((x, y))
-            rval = rgb_tuple[0]
-            gval = rgb_tuple[1]
-            bval = rgb_tuple[2]
+            rval, gval, bval = tuple_to_val(rgb_tuple)
+            append_multiple(rgb_list, rval, gval, bval)
 
-
-
-
+    return rgb_list
 
 
 def gen_text_code_list(text):
@@ -59,30 +62,35 @@ def gen_text_code_list(text):
 
     # Function to iterate over the characters in the string and add to list
     for c in lower_text:
-        if (c == ' '):
+        if c == ' ':
             new_c = 0
         else:
             new_c = ord(c) - 96  # Subtract 96 so our alphabets start from index 1
-        text_list.append(c)
+        text_list.append(new_c)
 
     return text_list
 
 
+def tuple_to_val(tuple):
+    """Split tuple into discrete R, G and B values"""
+    rval = tuple[0]
+    gval = tuple[1]
+    bval = tuple[2]
+    return rval, gval, bval
+
+
 def hide_text(text_to_hide):
+    """Function to hide our text in the image"""
     global main_image_file
 
-    text_list = gen_text_code_list(text_to_hide)
+    clear_bits()  # Clear low order bits of image
 
-    # Call function to clear out low order bits
-    clear_bits()
-
-    # Call function to listify our pixel space
+    text_list = gen_text_code_list(text_to_hide)    # Obtain character list of string
+    rgb_list = gen_rgb_list()                       # Listify our RGB space
 
     # Finally hide our text in the pixels
-    rgb_tuple = main_image_file.getpixel((0, 0))
-    rval = rgb_tuple[0]
-    gval = rgb_tuple[1]
-    bval = rgb_tuple[2]
+    rgb_tuple = main_image_file.getpixel((0, 0))    # Get RGB tuple of pixel
+    rval, gval, bval = tuple_to_val(rgb_tuple)      # Split tuple into 3 variables
 
 
 def set_image_file(image, image_file):
@@ -147,7 +155,6 @@ def clear_bits():
 def generate_ui():
     """Function to generate our GUI using tkinter"""
     global main_image_file
-    global second_image_file
 
     # Variables, text, etc. for temporary use
     secret_text = 'abc'

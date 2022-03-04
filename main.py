@@ -79,34 +79,49 @@ def tuple_to_val(tuple):
     return rval, gval, bval
 
 
+def char_to_bit_list(char_to_encode):
+    """This function takes a single character and decomposes it to a 5 bit representation"""
+    bit_list = []
+
+    bit_one = (char_to_encode & 16) >> 4
+    bit_two = (char_to_encode & 8) >> 3
+    bit_three = (char_to_encode & 4) >> 2
+    bit_four = (char_to_encode & 2) >> 1
+    bit_five = (char_to_encode & 1) >> 0
+
+    bit_list.append(bit_one)
+    bit_list.append(bit_two)
+    bit_list.append(bit_three)
+    bit_list.append(bit_four)
+    bit_list.append(bit_five)
+
+    return bit_list
+
+
 def hide_text(text_to_hide):
     """Function to hide our text in the image"""
     global main_image_file
+
+    rgb_index = 0  # Our index for the RGB list begins from 0
 
     clear_bits()  # Clear low order bits of image
 
     text_list = gen_text_code_list(text_to_hide)  # Obtain character list of string
     rgb_list = gen_rgb_list()  # Listify our RGB space
-
-    # Finally, hide our text in the pixels
-    rgb_tuple = main_image_file.getpixel((0, 0))  # Get RGB tuple of pixel
-    rval, gval, bval = tuple_to_val(rgb_tuple)  # Split tuple into 3 variables
-
-    rgx_index = 0  # Our index for the RGB list begins from 0
+    print(len(rgb_list))
 
     for str_index in range(len(text_list)):
+        bit_list = []
         char_to_encode = text_list[str_index]
-        bit_one = (char_to_encode & 16) >> 4
-        bit_two = (char_to_encode & 8) >> 3
-        bit_three = (char_to_encode & 4) >> 2
-        bit_four = (char_to_encode & 2) >> 1
-        bit_five = (char_to_encode & 1) >> 0
+        bit_list = char_to_bit_list(char_to_encode)
 
-        print(bit_one, end=" ")
-        print(bit_two, end=" ")
-        print(bit_three, end=" ")
-        print(bit_four, end=" ")
-        print(bit_five)
+        for i in range(5):
+            rgb_list[rgb_index] = rgb_list[rgb_index] | bit_list[i]
+            rgb_index = rgb_index + 1
+
+    print(rgb_list)
+
+
 
 
 def set_image_file(image, image_file):
@@ -152,6 +167,8 @@ def new_rgb_tuple_gen(rgb_tuple):
     new_rgb_tuple = (new_rval, new_gval, new_bval)
     return new_rgb_tuple
 
+def max_bits():
+    """This function calculates and returns the maximum bits the image can hold"""
 
 def clear_bits():
     """Function to clear the low order bits of our image"""
@@ -195,7 +212,7 @@ def generate_ui():
     select_button_main.pack()
 
     # Button to hide our text
-    image_button = Button(frame2, text="Hide text", command=lambda: hide_text("Hello world"), width=22)
+    image_button = Button(frame2, text="Hide text", command=lambda: hide_text("helloworld"), width=22)
     image_button.pack()
 
     frame1.pack(padx=10, pady=10)

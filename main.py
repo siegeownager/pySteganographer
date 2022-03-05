@@ -7,13 +7,7 @@ import sys
 main_image_file = PIL.Image.new('RGB', (0, 0))
 
 # Size of the window for our program
-WINDOW_SIZE = '300x100'
-
-
-def max_info_size():
-    """This function will tell us what the maximum size of the information that can be stored is"""
-    global main_image_file
-    dimensions = grab_dimensions(main_image_file)
+WINDOW_SIZE = '300x150'
 
 
 def print_bits():
@@ -98,6 +92,20 @@ def char_to_bit_list(char_to_encode):
     return bit_list
 
 
+def decode_image():
+    """Grab the hidden text from our image"""
+    global main_image_file
+    decode_list = []
+    rgb_list = gen_rgb_list()
+    rgb_list_len = len(rgb_list)
+    max_bit_num = max_bits(rgb_list_len)
+
+    for i in range(max_bit_num):
+        for j in range(5):
+            # Code to finish extracting the bits from our image
+
+
+
 def hide_text(text_to_hide):
     """Function to hide our text in the image"""
     global main_image_file
@@ -108,10 +116,8 @@ def hide_text(text_to_hide):
 
     text_list = gen_text_code_list(text_to_hide)  # Obtain character list of string
     rgb_list = gen_rgb_list()  # Listify our RGB space
-    print(len(rgb_list))
 
-    for str_index in range(len(text_list)):
-        bit_list = []
+    for str_index in range(max_bits(len(rgb_list))):
         char_to_encode = text_list[str_index]
         bit_list = char_to_bit_list(char_to_encode)
 
@@ -120,8 +126,6 @@ def hide_text(text_to_hide):
             rgb_index = rgb_index + 1
 
     print(rgb_list)
-
-
 
 
 def set_image_file(image, image_file):
@@ -167,8 +171,11 @@ def new_rgb_tuple_gen(rgb_tuple):
     new_rgb_tuple = (new_rval, new_gval, new_bval)
     return new_rgb_tuple
 
-def max_bits():
+
+def max_bits(tuple_length):
     """This function calculates and returns the maximum bits the image can hold"""
+    return tuple_length // 5
+
 
 def clear_bits():
     """Function to clear the low order bits of our image"""
@@ -189,18 +196,12 @@ def generate_ui():
     """Function to generate our GUI using tkinter"""
     global main_image_file
 
-    # Variables, text, etc. for temporary use
-    secret_text = 'abc'
-
     root = Tk()
 
     root.geometry(WINDOW_SIZE)
 
     # The frame variables for our 3 buttons
     frame1, frame2, frame3 = Frame(root), Frame(root), Frame(root)
-
-    # This button will be temporary, just for generating our sample image
-    frame4 = Frame(root)
 
     root.title("Image Steganographer")
 
@@ -212,11 +213,16 @@ def generate_ui():
     select_button_main.pack()
 
     # Button to hide our text
-    image_button = Button(frame2, text="Hide text", command=lambda: hide_text("helloworld"), width=22)
-    image_button.pack()
+    hide_button = Button(frame2, text="Hide text", command=lambda: hide_text("abc"), width=22)
+    hide_button.pack()
+
+    # Button to decode the hidden text
+    decode_button = Button(frame3, text="Decode", command=lambda: decode_image(), width=22)
+    decode_button.pack()
 
     frame1.pack(padx=10, pady=10)
     frame2.pack(padx=1, pady=1)
+    frame3.pack(padx=10, pady=10)
     root.mainloop()
 
     # Button to select the image that we want to hide

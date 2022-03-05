@@ -10,6 +10,45 @@ main_image_file = PIL.Image.new('RGB', (0, 0))
 WINDOW_SIZE = '300x150'
 
 
+def hide_text(text_to_hide):
+    """Function to hide our text in the image"""
+    global main_image_file
+
+    rgb_index = 0  # Our index for the RGB list begins from 0
+
+    clear_bits()  # Clear low order bits of image
+
+    text_list = gen_text_code_list(text_to_hide)  # Obtain character list of string
+    rgb_list = gen_rgb_list()  # Listify our RGB space
+    max_bit_len = max_bits(len(rgb_list))
+
+    max_len = 0
+    if len(text_list) < max_bit_len:
+        max_len = len(text_list)
+    else:
+        max_len = max_bit_len
+
+    for str_index in range(max_len):
+        char_to_encode = text_list[str_index]
+        bit_list = char_to_bit_list(char_to_encode)
+
+        for i in range(5):
+            rgb_list[rgb_index] = rgb_list[rgb_index] | bit_list[i]
+            rgb_index = rgb_index + 1
+
+    width, height = grab_dimensions(main_image_file)
+
+    i = 0
+
+    for x in range(width):
+        for y in range(height):
+            pixel_tuple = (rgb_list[i], rgb_list[i + 1], rgb_list[i + 2])
+            main_image_file.putpixel((x, y), pixel_tuple)
+
+    print(rgb_list)
+    main_image_file.save('encoded_sample.png')
+
+
 def print_bits():
     """Function to check our RGB values of the image pixels"""
     global main_image_file
@@ -95,37 +134,20 @@ def char_to_bit_list(char_to_encode):
 def decode_image():
     """Grab the hidden text from our image"""
     global main_image_file
-    decode_list = []
+
     rgb_list = gen_rgb_list()
     rgb_list_len = len(rgb_list)
     max_bit_num = max_bits(rgb_list_len)
+    print(rgb_list)
 
     for i in range(max_bit_num):
-        for j in range(5):
-            # Code to finish extracting the bits from our image
+        index_start = i * 5
+        index_end = index_start + 5
+        decode_list = []
 
-
-
-def hide_text(text_to_hide):
-    """Function to hide our text in the image"""
-    global main_image_file
-
-    rgb_index = 0  # Our index for the RGB list begins from 0
-
-    clear_bits()  # Clear low order bits of image
-
-    text_list = gen_text_code_list(text_to_hide)  # Obtain character list of string
-    rgb_list = gen_rgb_list()  # Listify our RGB space
-
-    for str_index in range(max_bits(len(rgb_list))):
-        char_to_encode = text_list[str_index]
-        bit_list = char_to_bit_list(char_to_encode)
-
-        for i in range(5):
-            rgb_list[rgb_index] = rgb_list[rgb_index] | bit_list[i]
-            rgb_index = rgb_index + 1
-
-    print(rgb_list)
+        for j in range(index_start, index_end):
+            decode_list.append(rgb_list[j] & 1)
+        # print(decode_list)
 
 
 def set_image_file(image, image_file):

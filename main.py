@@ -7,16 +7,18 @@ import sys
 main_image_file = PIL.Image.new('RGB', (0, 0))
 
 # Size of the window for our program
-WINDOW_SIZE = '300x150'
+WINDOW_SIZE = '300x200'
 
 
-def hide_text(text_to_hide):
+def hide_text(text):
     """Function to hide our text in the image"""
     global main_image_file
 
     rgb_index = 0  # Our index for the RGB list begins from 0
 
     clear_bits()  # Clear low order bits of image
+
+    text_to_hide = text.get('1.0', 'end-1c')  # -1c is to get rid of auto added newline
 
     text_list = gen_text_code_list(text_to_hide)  # Obtain character list of string
     rgb_list = gen_rgb_list()  # Listify our RGB space
@@ -97,18 +99,24 @@ def gen_text_code_list(text):
     for c in lower_text:
         if c == ' ':
             new_c = 27  # Set whitespace as numeric code 27
-        else:
+        elif c == '.':
+            new_c = 28
+        elif c == ',':
+            new_c = 29
+        elif 'a' <= c <= 'z':
             new_c = ord(c) - 96  # Subtract 96 so our alphabets start from index 1
+        else:
+            new_c = 30
         text_list.append(new_c)
 
     return text_list
 
 
-def tuple_to_val(tuple):
+def tuple_to_val(rgbtuple):
     """Split tuple into discrete R, G and B values"""
-    rval = tuple[0]
-    gval = tuple[1]
-    bval = tuple[2]
+    rval = rgbtuple[0]
+    gval = rgbtuple[1]
+    bval = rgbtuple[2]
     return rval, gval, bval
 
 
@@ -145,13 +153,21 @@ def encoded_text_convert(encoded_text_list):
     """Convert our number encoding back to characters"""
 
     for num in encoded_text_list:
-        if(num == 27):
-            print(' ', end="")
-        elif (num == 0):
-            return
-        else:
+        if (num > 0) and (num < 27):
             new_c = num + 96
             print(chr(new_c), end="")
+        elif num == 27:
+            print(' ', end="")
+        elif num == 28:
+            print('.', end="")
+        elif num == 29:
+            print(',', end="")
+        elif num == 30:
+            print('_', end="")
+        elif num == 0:
+            return
+        else:
+            print("error!")
 
 
 def decode_image():
@@ -249,7 +265,7 @@ def generate_ui():
     root.geometry(WINDOW_SIZE)
 
     # The frame variables for our 3 buttons
-    frame1, frame2, frame3 = Frame(root), Frame(root), Frame(root)
+    frame1, frame2, frame3, frame4 = Frame(root), Frame(root), Frame(root), Frame(root)
 
     root.title("Image Steganographer")
 
@@ -260,8 +276,12 @@ def generate_ui():
                                 width=22)
     select_button_main.pack()
 
+    # Text widget that lets the user enter the text to hide
+    text = Text(frame4, height=1)
+    text.pack()
+
     # Button to hide our text
-    hide_button = Button(frame2, text="Hide text", command=lambda: hide_text("sample text"), width=22)
+    hide_button = Button(frame2, text="Hide text", command=lambda: hide_text(text), width=22)
     hide_button.pack()
 
     # Button to decode the hidden text
@@ -269,24 +289,10 @@ def generate_ui():
     decode_button.pack()
 
     frame1.pack(padx=10, pady=10)
-    frame2.pack(padx=1, pady=1)
+    frame2.pack(padx=10, pady=10)
     frame3.pack(padx=10, pady=10)
+    frame4.pack(padx=10, pady=10)
     root.mainloop()
-
-    # Button to select the image that we want to hide
-    # button_default_text = StringVar()
-    # button_default_text.set("Select image to hide")
-    # select_button_secondary = Button(frame2, textvariable=button_default_text,
-    #                                 command=lambda: open_image(root, "secondary"), width=22)
-    # select_button_secondary.pack()
-
-    # Button to generate our sample images of necessary sizes
-    # image_button = Button(frame4, text="Generate Sample", command=lambda: sample_generate(secret_text), width=22)
-    # image_button.pack()
-
-    # Temporary button to hide text inside an image
-    # hide_button = Button(frame4, text="Hide Text", command=lambda: sample_generate(secret_text), width=22)
-    # hide_button.pack()
 
 
 def main():

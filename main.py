@@ -44,8 +44,8 @@ def hide_text(text_to_hide):
         for y in range(height):
             pixel_tuple = (rgb_list[i], rgb_list[i + 1], rgb_list[i + 2])
             main_image_file.putpixel((x, y), pixel_tuple)
+            i = i + 3
 
-    print(rgb_list)
     main_image_file.save('encoded_sample.png')
 
 
@@ -131,14 +131,37 @@ def char_to_bit_list(char_to_encode):
     return bit_list
 
 
+def get_char_from_list(decode_list):
+    """Get the number representation from the bit representation"""
+    num = 0
+
+    for i in range(5):
+        num = num + (decode_list[4 - i] * (2 ** i))
+
+    return num
+
+
+def encoded_text_convert(encoded_text_list):
+    """Convert our number encoding back to characters"""
+
+    for num in encoded_text_list:
+        if(num == 27):
+            print(' ', end="")
+        elif (num == 0):
+            return
+        else:
+            new_c = num + 96
+            print(chr(new_c), end="")
+
+
 def decode_image():
     """Grab the hidden text from our image"""
     global main_image_file
 
+    encoded_text_list = []
     rgb_list = gen_rgb_list()
     rgb_list_len = len(rgb_list)
     max_bit_num = max_bits(rgb_list_len)
-    print(rgb_list)
 
     for i in range(max_bit_num):
         index_start = i * 5
@@ -147,7 +170,10 @@ def decode_image():
 
         for j in range(index_start, index_end):
             decode_list.append(rgb_list[j] & 1)
-        # print(decode_list)
+        encoded_text_list.append(get_char_from_list(decode_list))
+
+    encoded_text_convert(encoded_text_list)
+    print("")
 
 
 def set_image_file(image, image_file):
@@ -235,7 +261,7 @@ def generate_ui():
     select_button_main.pack()
 
     # Button to hide our text
-    hide_button = Button(frame2, text="Hide text", command=lambda: hide_text("abc"), width=22)
+    hide_button = Button(frame2, text="Hide text", command=lambda: hide_text("sample text"), width=22)
     hide_button.pack()
 
     # Button to decode the hidden text
